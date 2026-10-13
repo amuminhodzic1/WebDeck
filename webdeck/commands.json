@@ -743,6 +743,18 @@
       "args": [
         {
           "TYPE": "input text"
+        },
+        {
+          "TYPE": "checkbox",
+          "value": "ctrl"
+        },
+        {
+          "TYPE": "checkbox",
+          "value": "shift"
+        },
+        {
+          "TYPE": "checkbox",
+          "value": "alt"
         }
       ],
       "style": {
