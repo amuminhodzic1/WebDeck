@@ -1,6 +1,7 @@
 flask
 flask_socketio
 Flask-Minify==0.43
+setuptools<81
 numpy
 gevent
 win10toast

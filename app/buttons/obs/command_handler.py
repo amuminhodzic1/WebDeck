@@ -85,8 +85,7 @@ def handle_command(message):
         
 
         
-        result = obs.call(obsrequests.TriggerHotkeyByKeySequence(keyId="OBS_KEY_"+hotkey,
-                                              keyModifiers=[]))
+        result = obs.call(obsrequests.TriggerHotkeyByKeySequence(keyId="OBS_KEY_"+hotkey))
         if "failed" in str(result):
             log.error(f"Failed to trigger hotkey '{hotkey}': {result}")
             raise RuntimeError(f"{text('failed')} :/")
