@@ -8,7 +8,11 @@ temp/*
 .config/plugins
 
 # virtual environment directory
-venv
+.venv/
+venv/
+env/
+__pycache__/
+*.pyc
 
 # compiled files
 build/
