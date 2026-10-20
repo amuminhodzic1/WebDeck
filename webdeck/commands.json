@@ -744,11 +744,12 @@
         {
           "TYPE": "input text"
         },
-        { 
+        {
           "TYPE": "checkbox",
           "value": "ctrl"
         },
-        { "TYPE": "checkbox",
+        {
+          "TYPE": "checkbox",
           "value": "shift"
         },
         {
