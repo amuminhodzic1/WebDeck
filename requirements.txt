@@ -1,5 +1,6 @@
 flask
 flask_socketio
+setuptools<81
 Flask-Minify==0.43
 setuptools<81
 numpy
