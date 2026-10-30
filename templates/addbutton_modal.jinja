@@ -393,7 +393,7 @@
 
                       var finalHotkeyCommand = keyCombination.join('+');
 
-                      return finalHotkeyCommand;
+                      return "/obs_key " + finalHotkeyCommand;
                     }
                 }).filter(function(value) {
                     return value !== ''; // Filter out empty values

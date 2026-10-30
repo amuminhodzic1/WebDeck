@@ -81,13 +81,49 @@ def handle_command(message):
     
     
     elif message.startswith("/obs_key"):
+        # 1. Grab the full string payload (e.g., "ctrl+shift+r")
         hotkey = message.split(' ')[-1]
 
-        result = obs.call(obsrequests.TriggerHotkeyByKeySequence(keyId="OBS_KEY_"+hotkey))
-        if "failed" in str(result):
-            log.error(f"Failed to trigger hotkey '{hotkey}': {result}")
-            raise RuntimeError(f"{text('failed')} :/")
-        log.success(f"Hotkey triggered '{hotkey}' successfully.")
+        # 2. Split the combination by the plus signs
+        parts = hotkey.split('+')
+
+        # 3. Create the empty modifiers dictionary structure OBS expects
+        modifiers = {
+            "shift": False,
+            "control": False,
+            "alt": False,
+            "command": False
+        }
+
+        primary_key = ""
+
+        # 4. Loop through the items to flag modifiers and isolate the character key
+        for part in parts:
+            clean_part = part.strip().lower()
+            if clean_part == 'ctrl':
+                modifiers["control"] = True
+            elif clean_part == 'shift':
+                modifiers["shift"] = True
+            elif clean_part == 'alt':
+                modifiers["alt"] = True
+            elif clean_part != "":
+                # Whatever is left over becomes your capitalized letter key (e.g., 'R')
+                primary_key = clean_part.upper()
+
+        # 5. Format the strict OBS system key id string (e.g., "OBS_KEY_R")
+        formatted_key = f"OBS_KEY_{primary_key}"
+
+        # 6. Pass BOTH the formatted key ID and the keyModifiers payload dictionary to OBS
+        result = obs.call(obsrequests.TriggerHotkeyByKeySequence(
+            keyId=formatted_key,
+            keyModifiers=modifiers
+        ))
+
+    if "failed" in str(result):
+        log.error(f"Failed to trigger hotkey '{hotkey}': {result}")
+        raise RuntimeError(f"{text('failed')} :/")
+        
+    log.success(f"Hotkey combination '{hotkey}' triggered successfully.")
 
 
 
