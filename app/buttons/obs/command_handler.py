@@ -9,6 +9,7 @@ import app.buttons.obs.scenes as scene
 import app.buttons.obs.recording as recording
 import app.buttons.obs.streaming as stream
 import app.buttons.obs.virtualcam as virtualcam
+import json
 
 
 #    https://github.com/obsproject/obs-websocket/blob/master/docs/generated/protocol.md
@@ -81,50 +82,51 @@ def handle_command(message):
     
     
     elif message.startswith("/obs_key"):
-        # 1. Grab the full string payload (e.g., "ctrl+shift+r")
-        hotkey = message.split(' ')[-1]
-
-        # 2. Split the combination by the plus signs
-        parts = hotkey.split('+')
-
-        # 3. Create the empty modifiers dictionary structure OBS expects
-        modifiers = {
-            "shift": False,
-            "control": False,
-            "alt": False,
-            "command": False
-        }
-
+        raw_combination = message.split(' ')[-1]
+        parts = raw_combination.split('+')
+    
+        # Initialize separate modifier states
+        ctrl_flag = False
+        shift_flag = False
+        alt_flag = False
+    
         primary_key = ""
-
-        # 4. Loop through the items to flag modifiers and isolate the character key
+    
         for part in parts:
             clean_part = part.strip().lower()
             if clean_part == 'ctrl':
-                modifiers["control"] = True
+                ctrl_flag = True
             elif clean_part == 'shift':
-                modifiers["shift"] = True
+                shift_flag = True
             elif clean_part == 'alt':
-                modifiers["alt"] = True
+                alt_flag = True
             elif clean_part != "":
-                # Whatever is left over becomes your capitalized letter key (e.g., 'R')
                 primary_key = clean_part.upper()
 
-        # 5. Format the strict OBS system key id string (e.g., "OBS_KEY_R")
         formatted_key = f"OBS_KEY_{primary_key}"
 
-        # 6. Pass BOTH the formatted key ID and the keyModifiers payload dictionary to OBS
-        result = obs.call(obsrequests.TriggerHotkeyByKeySequence(
-            keyId=formatted_key,
-            keyModifiers=modifiers
-        ))
+        # Build the strict literal JSON payload format required by OBS Studio v5 core
+        # op: 6 represents a Request payload in the OBS WebSocket v5 protocol
+        raw_request = {
+            "op": 6,
+            "d": {
+                "requestType": "TriggerHotkeyByKeySequence",
+                "requestId": "webdeck_hotkey_trigger",
+                "requestData": {
+                    "keyId": formatted_key,
+                    "keyModifiers": {
+                        "shift": shift_flag,
+                        "control": ctrl_flag,
+                        "alt": alt_flag
+                    }
+                }
+            }
+        }
 
-    if "failed" in str(result):
-        log.error(f"Failed to trigger hotkey '{hotkey}': {result}")
-        raise RuntimeError(f"{text('failed')} :/")
-        
-    log.success(f"Hotkey combination '{hotkey}' triggered successfully.")
-
+        # Convert the payload to a JSON string string and send it via the library's internal client socket
+        obs.ws.send(json.dumps(raw_request))
+    
+        log.success(f"Hotkey combination '{raw_combination}' sent successfully to OBS.")
 
 
 
